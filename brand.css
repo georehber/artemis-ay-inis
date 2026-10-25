@@ -1,0 +1,35 @@
+
+
+:root {
+  
+  --gr-ana: #003286;          
+  --gr-ana-koyu: #002362;     
+  --gr-ana-zemin: #e3efff;    
+  --gr-aksan: #11ad00;        
+  --gr-aksan-koyu: #008100;   
+  --gr-aksan-zemin: #dcf8d9;  
+  --gr-zemin: #fcfcfc;        
+  --gr-kart: #ffffff;         
+  --gr-sessiz: #f1edee;       
+  --gr-ikincil: #e1e5eb;      
+  --gr-kenarlik: #e4e4e7;     
+  --gr-metin: #12080b;        
+  --gr-metin-soluk: #686163;  
+  --gr-metin-ters: #f8f8f8;   
+  --gr-uyari: #945a00;        
+  --gr-uyari-zemin: #fff3df;  
+
+  
+  --gr-font-baslik: Geist, "Geist Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --gr-font-govde: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --gr-font-kod: "Fira Code", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  
+  --gr-yaricap: 12px;         
+  --gr-yaricap-sm: 8px;       
+  --gr-yaricap-hap: 999px;    
+
+  
+  --gr-golge-sm: 0 8px 24px rgba(20, 35, 70, .06);   
+  --gr-golge-md: 0 18px 48px rgba(20, 35, 70, .10);  
+}

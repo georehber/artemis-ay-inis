@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Artemis Ay'da nereye inmeli?</title>
+<meta name="description" content="Ay'ın güney kutbunda NASA'nın dokuz Artemis aday iniş bölgesi; güneş, Dünya ile bağlantı, buza yakınlık ve düz araziye göre sıralandı.">
+<meta name="theme-color" content="#003286">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Artemis astronotları Ay'da nereye inmeli?">
+<meta property="og:description" content="Ay'ın güney kutbunda NASA'nın dokuz aday iniş bölgesi, gerçek LRO verileriyle sıralandı.">
+<meta property="og:image" content="https://georehber.com/artemis-ay-inis/onizleme.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ay'ın güney kutbu kabartması üzerinde dokuz aday iniş bölgesi ve iniş uygunluğu">
+<meta property="og:url" content="https://georehber.com/artemis-ay-inis/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://georehber.com/artemis-ay-inis/onizleme.jpg">
+<link rel="icon" type="image/png" href="img/bakircaycbs_logo.png">
+<link rel="preconnect" href="https://js.arcgis.com">
+<link rel="preconnect" href="https://www.arcgis.com">
+<link rel="preconnect" href="https://services-eu1.arcgis.com">
+<link rel="preconnect" href="https://tiles-eu1.arcgis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="config.json" as="fetch" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="brand.css">
+<link rel="stylesheet" href="https://js.arcgis.com/4.32/esri/themes/light/main.css">
+<script>window.configSozu = fetch("config.json").then(r => r.json());</script>
+<script src="https://js.arcgis.com/4.32/"></script>
+<style>
+  
+  :root {
+    --ana: var(--gr-ana);
+    --ana-koyu: var(--gr-ana-koyu);
+    --ana-zemin: var(--gr-ana-zemin);
+    --murekkep: var(--gr-metin);
+    --ikincil: var(--gr-metin-soluk);
+    --cizgi: var(--gr-kenarlik);
+    --kart: var(--gr-kart);
+    --zemin: var(--gr-zemin);
+    --sessiz: var(--gr-sessiz);
+    --golge: var(--gr-golge-sm);
+    --golge-guclu: var(--gr-golge-md);
+    --yaricap: var(--gr-yaricap);
+    --yaricap-sm: var(--gr-yaricap-sm);
+    --kenar: 16px;
+    --baslik: 60px;
+    --alt: 64px;  
+    --calcite-font-family: var(--gr-font-govde);
+    --calcite-sans-family: var(--gr-font-govde);
+    --calcite-color-brand: var(--gr-ana);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; width: 100%; height: 100%; overflow: hidden;
+    background: var(--zemin); color: var(--murekkep);
+    font-family: var(--gr-font-govde); -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--ana); outline-offset: 2px; }
+
+  
+  header {
+    position: fixed; inset: 0 0 auto 0; height: calc(var(--baslik) + env(safe-area-inset-top));
+    padding: env(safe-area-inset-top) var(--kenar) 0; z-index: 30;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--kart); border-bottom: 3px solid var(--ana);
+  }
+  .marka { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; color: inherit; text-decoration: none; }
+  .marka img { width: 40px; height: 40px; flex: none; }
+  .marka-yazi { min-width: 0; }
+  .marka h1 {
+    margin: 0; font-family: var(--gr-font-baslik); font-size: 18px; font-weight: 700; letter-spacing: -.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ana);
+  }
+  .slogan {
+    display: block; margin-top: 1px; font-size: 11.5px; color: var(--ikincil); letter-spacing: .02em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .hakkinda-dugme {
+    flex: none; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px;
+    border: 1px solid var(--cizgi); border-radius: var(--gr-yaricap-hap); background: var(--kart); cursor: pointer;
+    font-size: 13px; font-weight: 600; color: var(--ana);
+  }
+  .hakkinda-dugme:hover { background: var(--ana-zemin); }
+
+  #harita { position: fixed; top: calc(var(--baslik) + 3px + env(safe-area-inset-top)); left: 0; right: 0; bottom: 0;
+            background: #0b0d12; }
+
+  
+  #katman-paneli {
+    position: fixed; z-index: 20; top: calc(var(--baslik) + 3px + var(--kenar) + env(safe-area-inset-top));
+    left: var(--kenar); width: 308px; max-height: 60vh; max-height: 60dvh;
+    display: flex; flex-direction: column;
+    background: var(--kart); border: 1px solid var(--cizgi); border-radius: var(--yaricap); box-shadow: var(--golge);
+  }
+  .panel-baslik {
+    flex: none; display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 14px;
+    border: 0; background: none; cursor: pointer; text-align: left; border-radius: var(--yaricap); color: var(--ana);
+  }
+  .panel-baslik strong { flex: 1; font-family: var(--gr-font-baslik); font-size: 14px; font-weight: 600; color: var(--murekkep); }
+  .panel-baslik .ok { width: 18px; height: 18px; transition: transform .2s; color: var(--ikincil); }
+  #katman-paneli[data-acik="false"] .ok { transform: rotate(-90deg); }
+  #katman-paneli[data-acik="false"] .panel-govde { display: none; }
+  .panel-govde {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 4px 8px 6px; border-top: 1px solid var(--cizgi);
+    scrollbar-width: thin; scrollbar-color: #b9c3d6 transparent; overscroll-behavior: contain;
+  }
+  .panel-govde::-webkit-scrollbar { width: 8px; }
+  .panel-govde::-webkit-scrollbar-track { background: transparent; }
+  .panel-govde::-webkit-scrollbar-thumb { background: #b9c3d6; border-radius: 4px; }
+  .panel-govde::-webkit-scrollbar-thumb:hover { background: #8e9bb5; }
+  .bolum + .bolum { border-top: 1px solid #f0f0f2; }
+  .katman {
+    display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px;
+    padding: 10px 8px; border-radius: var(--yaricap-sm); cursor: pointer;
+  }
+  .katman:hover { background: #f7f8fa; }
+  .simge { width: 28px; height: 28px; display: grid; place-items: center; transition: opacity .15s; }
+  .katman-ad { font-size: 14px; font-weight: 600; line-height: 1.25; transition: opacity .15s; }
+  .katman-ipucu { display: block; font-size: 12px; font-weight: 400; color: var(--ikincil); margin-top: 2px; }
+  .katman[data-durum="kapali"] .katman-ad, .katman[data-durum="kapali"] .simge,
+  .katman[data-durum="kapali"] + .lejant { opacity: .4; }
+  .anahtar { position: relative; width: 36px; height: 22px; flex: none; }
+  .anahtar input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .anahtar span {
+    position: absolute; inset: 0; border-radius: 11px; background: #cfd3db; transition: background .15s;
+    pointer-events: none;
+  }
+  .anahtar span::after {
+    content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25); transition: transform .15s;
+  }
+  .anahtar input:checked + span { background: var(--ana); }
+  .anahtar input:checked + span::after { transform: translateX(14px); }
+  .anahtar input:focus-visible + span { outline: 3px solid var(--ana); outline-offset: 2px; }
+  
+  .lejant { margin: -2px 8px 10px 46px; font-size: 12px; color: var(--ikincil); }
+  .lejant-satir { display: flex; align-items: center; gap: 10px; min-height: 20px; }
+  .lejant-satir + .lejant-satir { margin-top: 4px; }
+  .lejant-satir i { flex: none; width: 22px; height: 14px; border-radius: 3px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+  .lejant-ayrac { height: 1px; margin: 8px 0; background: #f0f0f2; }
+  
+  .bolum-baslik { margin: 10px 8px 6px; font-family: var(--gr-font-baslik); font-size: 12px; font-weight: 600;
+                  text-transform: uppercase; letter-spacing: .07em; color: var(--ana); }
+  .sira { list-style: none; margin: 0 4px 4px; padding: 0; }
+  .sira li {
+    display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 10px; padding: 8px;
+    border-radius: var(--yaricap-sm); cursor: pointer; font-size: 13px;
+  }
+  .sira li:hover, .sira li:focus-visible { background: var(--ana-zemin); outline: none; }
+  .sira .no {
+    width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 12px;
+    background: var(--ana-zemin); color: var(--ana);
+  }
+  .sira li:first-child .no { background: var(--ana); color: #fff; }
+  .sira .ad { font-weight: 600; line-height: 1.25; }
+  .sira .alt { display: block; font-weight: 400; font-size: 12px; color: var(--ikincil); margin-top: 1px; }
+  .sira .puan { font-family: var(--gr-font-baslik); font-weight: 600; color: var(--ana); }
+  .panel-not { margin: 4px 8px 2px; padding-top: 8px; border-top: 1px solid #f0f0f2;
+               font-size: 11.5px; color: var(--ikincil); line-height: 1.45; }
+
+  
+  #sayac {
+    position: fixed; z-index: 15; left: var(--kenar);
+    bottom: calc(26px + env(safe-area-inset-bottom));
+    max-width: calc(100% - 2 * var(--kenar) - 120px);
+    display: flex; align-items: center; gap: 10px; padding: 11px 16px;
+    background: var(--kart); border: 1px solid var(--cizgi); border-radius: var(--gr-yaricap-hap); box-shadow: var(--golge);
+    font-size: 14px; white-space: nowrap; overflow: hidden;
+  }
+  #sayac .nokta { width: 8px; height: 8px; border-radius: 50%; background: var(--ana); flex: none; }
+  #sayac b { font-weight: 700; color: var(--ana); }
+  #sayac .ayrac { color: #c3c7cf; margin: 0 8px; }
+  #sayac .metin { overflow: hidden; text-overflow: ellipsis; }
+
+  
+  dialog {
+    width: min(560px, calc(100% - 2 * var(--kenar))); max-height: calc(100% - 64px); padding: 0;
+    border: 0; border-radius: 16px; box-shadow: var(--golge-guclu); color: var(--murekkep);
+  }
+  dialog[open] { display: flex; flex-direction: column; }
+  dialog::backdrop { background: rgba(0, 20, 60, .45); }
+  .dialog-ic { padding: 24px 24px 8px; overflow-y: auto; }
+  .dialog-marka { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .dialog-marka img { width: 48px; height: 48px; }
+  dialog h2 { margin: 0; font-family: var(--gr-font-baslik); font-size: 22px; font-weight: 700; color: var(--ana); }
+  dialog .giris { margin: 0 0 16px; color: var(--ikincil); font-size: 15px; line-height: 1.5; }
+  dialog h3 { margin: 18px 0 6px; font-family: var(--gr-font-baslik); font-size: 12px; text-transform: uppercase;
+              letter-spacing: .07em; color: var(--ana); }
+  dialog p, dialog li { font-size: 14px; line-height: 1.55; margin: 0; }
+  dialog ul { margin: 0; padding-left: 18px; }
+  dialog li + li { margin-top: 4px; }
+  dialog a { color: var(--ana); }
+  dialog .kaynaklar li { font-size: 13px; color: var(--ikincil); }
+  .rakamlar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .rakam { padding: 12px; border-radius: var(--yaricap-sm); background: var(--ana-zemin); }
+  .rakam b { display: block; font-family: var(--gr-font-baslik); font-size: 20px; font-weight: 700; color: var(--ana); }
+  .rakam span { font-size: 12px; color: var(--ikincil); }
+  .dialog-alt { display: flex; justify-content: flex-end; padding: 12px 24px 20px; }
+  .dialog-alt button { height: 40px; padding: 0 18px; border: 0; border-radius: var(--gr-yaricap-hap); cursor: pointer;
+                       background: var(--ana); color: var(--gr-metin-ters); font-weight: 600; }
+  .dialog-alt button:hover { background: var(--ana-koyu); }
+
+  
+  #yukleniyor {
+    position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; background: var(--zemin);
+    transition: opacity .35s;
+  }
+  #yukleniyor.bitti { opacity: 0; pointer-events: none; }
+  .yukleme-ic { display: grid; justify-items: center; gap: 14px; color: var(--ikincil); font-size: 14px; }
+  .yukleme-ic img.ay { width: 170px; height: 170px; }  
+
+  
+  .esri-view .esri-ui-corner .esri-component.esri-widget--button,
+  .esri-view .esri-ui-corner .esri-zoom { box-shadow: var(--golge); border-radius: var(--yaricap-sm); overflow: hidden; }
+  .esri-attribution, .esri-popup__main-container, .esri-features { font-family: var(--gr-font-govde); }
+  .esri-popup__main-container { border-radius: var(--yaricap) !important; }
+
+  @media (max-width: 720px) {
+    .marka h1 { font-size: 15px; }
+    .marka img { width: 34px; height: 34px; }
+    .slogan { font-size: 10.5px; }
+    .hakkinda-dugme span { display: none; }
+    .hakkinda-dugme { width: 36px; padding: 0; justify-content: center; }
+    #katman-paneli { right: calc(var(--kenar) + 48px); width: auto; max-height: 45vh; max-height: 45dvh; }
+    .katman { padding: 8px 6px; }
+    .panel-baslik { padding: 10px 12px; }
+    
+    #harita { bottom: calc(var(--alt) + env(safe-area-inset-bottom)); }
+    #sayac {
+      left: 0; right: 0; bottom: 0; width: 100%; max-width: none;
+      height: calc(var(--alt) + env(safe-area-inset-bottom));
+      padding: 0 var(--kenar) env(safe-area-inset-bottom);
+      border: 0; border-top: 1px solid var(--cizgi); border-radius: 0; box-shadow: 0 -6px 16px rgba(20, 35, 70, .06);
+    }
+    #sayac .metin { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.2; }
+    #sayac .s1, #sayac .s2 { display: block; overflow: hidden; text-overflow: ellipsis; }
+    #sayac .s1 { font-size: 14px; }
+    #sayac .s2 { font-size: 12px; color: var(--ikincil); }
+    #sayac .ayrac { display: none; }
+    .rakamlar { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 360px) {
+    .slogan { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation-duration: 0s !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="marka">
+    <img src="img/bakircaycbs_logo.png" alt="BakırçayCBS logosu" width="40" height="40">
+    <span class="marka-yazi">
+      <h1>Artemis astronotları Ay'da nereye inmeli?</h1>
+      <span class="slogan">Ay'ın güney kutbunda NASA'nın dokuz aday iniş bölgesi</span>
+    </span>
+  </div>
+  <button class="hakkinda-dugme" type="button" id="hakkinda-ac" aria-haspopup="dialog" aria-label="Hakkında">
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 10.5v6M12 7.2v.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <span>Hakkında</span>
+  </button>
+</header>
+
+<div id="harita" role="application" aria-label="Ay'ın güney kutbu iniş uygunluğu haritası"></div>
+
+<section id="katman-paneli" data-acik="true" aria-label="Katmanlar ve lejant">
+  <button class="panel-baslik" type="button" id="panel-ac-kapa" aria-expanded="true" aria-controls="panel-govde">
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5zm-9 9l9 5 9-5M3 16l9 5 9-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    <strong>Katmanlar ve lejant</strong>
+    <svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <div class="panel-govde" id="panel-govde" tabindex="0" aria-label="Lejant (kaydırılabilir)">
+
+    <div class="bolum">
+      <label class="katman" data-katman="İniş uygunluğu">
+        <span class="simge"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2" fill="#0072B2"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#56B4E9"/><rect x="2" y="13" width="9" height="9" rx="2" fill="#F0E442"/><rect x="13" y="13" width="9" height="9" rx="2" fill="#D55E00"/></svg></span>
+        <span class="katman-ad">İniş uygunluğu<span class="katman-ipucu">Güneş, Dünya, buz ve araziye göre</span></span>
+        <span class="anahtar"><input type="checkbox" checked aria-label="İniş uygunluğu katmanını göster"><span></span></span>
+      </label>
+      <div class="lejant" aria-label="İniş uygunluğu sınıfları">
+        <div class="lejant-satir"><i style="background:#0072B2"></i>Yüksek uygunluk</div>
+        <div class="lejant-satir"><i style="background:#56B4E9"></i>Uygun</div>
+        <div class="lejant-satir"><i style="background:#F0E442"></i>Orta uygunluk</div>
+        <div class="lejant-satir"><i style="background:#E69F00"></i>Düşük uygunluk</div>
+        <div class="lejant-satir"><i style="background:#D55E00"></i>Çok düşük uygunluk</div>
+        <div class="lejant-ayrac"></div>
+        <div class="lejant-satir"><i style="background:rgba(70,70,70,.55)"></i>Uygun değil (dik, gölgede ya da Dünya görünmüyor)</div>
+        <div class="lejant-satir"><i style="background:rgba(204,121,167,.55)"></i>Hiç güneş almayan gölge</div>
+      </div>
+    </div>
+
+    <div class="bolum">
+      <label class="katman" data-katman="Aday iniş bölgeleri">
+        <span class="simge"><svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="3" y="3" width="16" height="16" fill="none" stroke="#141414" stroke-width="2"/></svg></span>
+        <span class="katman-ad">Aday iniş bölgeleri<span class="katman-ipucu">NASA'nın belirlediği dokuz bölge</span></span>
+        <span class="anahtar"><input type="checkbox" checked aria-label="Aday iniş bölgeleri katmanını göster"><span></span></span>
+      </label>
+    </div>
+
+    <div class="bolum">
+      <label class="katman" data-katman="Bölgedeki en iyi nokta">
+        <span class="simge"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.6 6.2 6.7.5-5.1 4.4 1.6 6.5L12 16.7 6.2 20.2l1.6-6.5L2.7 9.3l6.7-.5z" fill="#fff" stroke="#141414" stroke-width="1.6" stroke-linejoin="round"/></svg></span>
+        <span class="katman-ad">Bölgedeki en iyi nokta<span class="katman-ipucu">Her bölgede en yüksek puanlı yer</span></span>
+        <span class="anahtar"><input type="checkbox" checked aria-label="En iyi nokta katmanını göster"><span></span></span>
+      </label>
+    </div>
+
+    <div class="bolum">
+      <div class="bolum-baslik">Uygunluk sırası</div>
+      <ul class="sira" id="sira"></ul>
+    </div>
+
+    <p class="panel-not">Bir bölgeye dokunun: harita oraya gider ve ayrıntılar açılır.</p>
+  </div>
+</section>
+
+<div id="sayac" aria-live="polite"><span class="nokta" aria-hidden="true"></span><span class="metin">Yükleniyor...</span></div>
+
+<dialog id="hakkinda" aria-labelledby="hakkinda-baslik">
+  <div class="dialog-ic">
+    <div class="dialog-marka">
+      <img src="img/bakircaycbs_logo.png" alt="" width="48" height="48">
+      <h2 id="hakkinda-baslik">Artemis astronotları Ay'da nereye inmeli?</h2>
+    </div>
+    <p class="giris">NASA, Artemis astronotlarının Ay'ın güney kutbunda inebileceği dokuz aday bölge belirledi. Bu harita o dokuz bölgenin her köşesini gerçek uydu verileriyle inceleyip iniş için ne kadar elverişli olduğunu gösteriyor.</p>
+    <div class="rakamlar">
+      <div class="rakam"><b id="r-bolge">–</b><span>aday iniş bölgesi</span></div>
+      <div class="rakam"><b id="r-alan">–</b><span>km² incelenen alan</span></div>
+      <div class="rakam"><b id="r-yuksek">–</b><span>km² yüksek uygunlukta</span></div>
+    </div>
+    <h3>Neye bakıldı</h3>
+    <ul>
+      <li><b>Güneş:</b> Bir yerin uzun yıllar boyunca ne kadar süre güneş gördüğü; astronotlar için ışık ve enerji demek.</li>
+      <li><b>Dünya ile bağlantı:</b> Dünya'nın ufkun üstünde kaldığı süre; Dünya görünmüyorsa doğrudan haberleşme kesilir.</li>
+      <li><b>Buza yakınlık:</b> Hiç güneş almayan soğuk çukurlarda donmuş su olabilir; yürüme mesafesindeki buz iniş yerini değerli kılar.</li>
+      <li><b>Düz arazi:</b> Aracın güvenle inebilmesi için zeminin dik olmaması gerekir.</li>
+    </ul>
+    <p style="margin-top:8px">Eğimi 10°'yi aşan, hiç güneş almayan gölgede kalan, zamanın %5'inden azında güneş ya da %25'inden azında Dünya gören yerler baştan elendi. Buz, yaz ortalaması 125 K'nin (yaklaşık -148 °C) altında kalan yerlerde aranır ve en fazla 2 km yürüme mesafesi hesaba katılır. Kalan alanlar beş sınıfa ayrıldı, bölgeler en iyi yerlerine ve uygun alanın genişliğine göre sıralandı.</p>
+    <h3>Veri</h3>
+    <p>NASA Lunar Reconnaissance Orbiter: LOLA yükseklik ve aydınlanma haritaları (2009–2017), Diviner yüzey sıcaklıkları (2009–2019). NASA Artemis aday iniş bölgeleri (2024). Açılıştaki Ay: NASA SVS, LROC renkli mozaiği (2019).</p>
+    <h3>Kaynaklar</h3>
+    <ul class="kaynaklar">
+      <li>Aday bölgeler: NASA, Artemis III iniş bölgeleri güncellemesi (28 Ekim 2024); sınırlar <a href="https://quickmap.lroc.im-ldi.com/" target="_blank" rel="noopener">LROC QuickMap</a>.</li>
+      <li>İniş eğimi (10°), yürüyüş eğimi (20°) ve mesafesi (2 km), güneş (%5) ve Dünya (%25) eşikleri: Dwyer Cianciolo, NASA HLS "Key Artemis III Landing Requirements" sunumu (2024), <a href="https://ntrs.nasa.gov/citations/20240009596" target="_blank" rel="noopener">NTRS 20240009596</a>.</li>
+      <li>Yükseklik: LRO LOLA kutup yükseklik modeli, 40 m, <a href="https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/polar/img/" target="_blank" rel="noopener">PDS Geosciences</a>.</li>
+      <li>Güneş ve Dünya görünürlüğü, kalıcı gölge: Mazarico ve ark. 2011, Icarus 211, 1066–1081; <a href="https://pgda.gsfc.nasa.gov/products/69" target="_blank" rel="noopener">NASA PGDA</a>.</li>
+      <li>Yüzey sıcaklığı: Williams ve ark. 2019, JGR Planets 124, 2505–2521; <a href="https://www.diviner.ucla.edu/data" target="_blank" rel="noopener">Diviner</a>.</li>
+      <li>Yüzey buzu eşiği (110 K): Vasavada, Paige ve Wood 1999, Icarus 141, 179–193.</li>
+      <li>Yüzey altı buz ölçütü (125 K, eğim 20°, güneş %20) ve sonuçların karşılaştırması: Moye ve ark. 2025, <a href="https://www.hou.usra.edu/meetings/lpsc2025/pdf/2655.pdf" target="_blank" rel="noopener">LPSC #2655</a>.</li>
+      <li>Açılıştaki Ay: <a href="https://svs.gsfc.nasa.gov/4720" target="_blank" rel="noopener">NASA SVS CGI Moon Kit</a> (2019).</li>
+    </ul>
+    <h3>Bilmeniz gerekenler</h3>
+    <ul>
+      <li>Değerler uzun yılların ortalamasıdır; gerçek iniş günü seçildiğinde ışık ve görüş koşulları değişir.</li>
+      <li>NASA'nın kendi seçimi fırlatma takvimi gibi burada olmayan başka ölçütlere de dayanır.</li>
+    </ul>
+    <h3>Künye</h3>
+    <p>Hazırlayan: Mehmet Ali Yanmaz · <a href="https://georehber.com/" target="_blank" rel="noopener">georehber.com</a> · BakırçayCBS #30DayMapChallenge 2026, Gün 10 · Altlık: LOLA yükseklik verisinden kabartma · Renkler: Okabe-Ito paleti, renk körlüğüne uygun · Araç: Claude, Python, ArcGIS Pro, ArcGIS Online</p>
+  </div>
+  <div class="dialog-alt"><button type="button" id="hakkinda-kapat">Haritaya dön</button></div>
+</dialog>
+
+<div id="yukleniyor" role="status"><div class="yukleme-ic"><img class="ay" src="img/ay_cizgi.svg" alt="" width="170" height="170">Harita yükleniyor</div></div>
+
+<script>
+require(["esri/WebMap", "esri/views/MapView", "esri/widgets/Home", "esri/widgets/Zoom", "esri/core/reactiveUtils",
+         "esri/geometry/Point"], (WebMap, MapView, Home, Zoom, reactiveUtils, Point) => {
+  const $ = s => document.querySelector(s);
+  const sayi = (n, b = 0) => Number(n).toLocaleString("tr-TR", { minimumFractionDigits: b, maximumFractionDigits: b });
+  const darEkran = window.matchMedia("(max-width: 720px)");
+
+  const panel = $("#katman-paneli");
+  let panelDegisti = () => {};
+  const paneliAyarla = acik => {
+    panel.dataset.acik = String(acik);
+    $("#panel-ac-kapa").setAttribute("aria-expanded", String(acik));
+    panelDegisti();
+  };
+  $("#panel-ac-kapa").addEventListener("click", () => paneliAyarla(panel.dataset.acik !== "true"));
+
+  const hakkinda = $("#hakkinda");
+  $("#hakkinda-ac").addEventListener("click", () => hakkinda.showModal());
+  $("#hakkinda-kapat").addEventListener("click", () => hakkinda.close());
+  hakkinda.addEventListener("click", e => { if (e.target === hakkinda) hakkinda.close(); });
+
+  window.configSozu.then(async config => {
+    const harita = new WebMap({ portalItem: { id: config.webmap_id } });
+    const view = new MapView({
+      container: "harita", map: harita, background: { color: "#0b0d12" },
+      constraints: { rotationEnabled: false, snapToZoom: false },
+      ui: { components: ["attribution"] },
+      popup: { dockEnabled: true, dockOptions: { buttonEnabled: false, breakpoint: false,
+               position: darEkran.matches ? "bottom-center" : "top-right" } }
+    });
+    view.ui.add(new Zoom({ view }), "top-right");
+    view.ui.add(new Home({ view }), "top-right");
+    window.ayHarita = view;
+
+    await harita.loadAll();
+    const katman = ad => harita.allLayers.find(l => l.title === ad);
+    const bolgeler = katman("Aday iniş bölgeleri");
+    const ozet = harita.tables.find(t => t.title === "Genel özet");
+
+    document.querySelectorAll(".katman[data-katman]").forEach(etiket => {
+      const l = katman(etiket.dataset.katman), kutu = etiket.querySelector("input");
+      if (!l) return;
+      const yansit = () => { l.visible = kutu.checked; etiket.dataset.durum = kutu.checked ? "acik" : "kapali"; };
+      kutu.checked = l.visible; yansit();
+      kutu.addEventListener("change", yansit);
+    });
+
+    if (ozet) {
+      const q = ozet.createQuery(); q.where = "sinif IN ('yuksek', 'toplam')"; q.outFields = ["sinif", "birlesik_km2"];
+      const satir = Object.fromEntries((await ozet.queryFeatures(q)).features.map(f => [f.attributes.sinif, f.attributes.birlesik_km2]));
+      $("#sayac .metin").innerHTML =
+        `<span class="s1"><b>${sayi(satir.yuksek)} km²</b> yüksek uygunlukta alan</span><span class="ayrac">·</span>` +
+        `<span class="s2"><b>9</b> aday iniş bölgesinde</span>`;
+      $("#r-alan").textContent = sayi(satir.toplam);
+      $("#r-yuksek").textContent = sayi(satir.yuksek);
+    }
+
+    const q = bolgeler.createQuery(); q.where = "1=1"; q.outFields = ["*"]; q.returnGeometry = true; q.orderByFields = ["sira"];
+    const kayitlar = (await bolgeler.queryFeatures(q)).features;
+    $("#r-bolge").textContent = sayi(kayitlar.length);
+    const liste = $("#sira");
+    for (const f of kayitlar) {
+      const a = f.attributes;
+      const li = document.createElement("li");
+      li.tabIndex = 0;
+      li.innerHTML = `<span class="no">${a.sira}</span>` +
+        `<span class="ad">${a.bolge_adi}<span class="alt">${sayi(a.uygun_alan_km2)} km² uygun iniş alanı</span></span>` +
+        `<span class="puan">${sayi(a.puan, 2)}</span>`;
+      const git = () => {
+        f.layer = bolgeler; f.sourceLayer = bolgeler;
+        if (darEkran.matches) paneliAyarla(false);
+        view.openPopup({ features: [f], location: f.geometry.extent.center });
+      };
+      li.addEventListener("click", git);
+      li.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); git(); } });
+      liste.appendChild(li);
+    }
+
+    darEkran.addEventListener("change", () => {
+      view.popup.dockOptions = { ...view.popup.dockOptions, position: darEkran.matches ? "bottom-center" : "top-right" };
+      bosluguGuncelle();
+    });
+    await reactiveUtils.whenOnce(() => view.ready);
+
+    const popupKutusu = () => {
+      const k = view.popup.visible && document.querySelector(".esri-popup--is-docked .esri-popup__main-container");
+      return k ? k.getBoundingClientRect() : null;
+    };
+    function bosluguGuncelle() {
+      const b = panel.getBoundingClientRect(), h = view.container.getBoundingClientRect(), k = 16;
+      const p = darEkran.matches
+        ? { top: Math.round(b.bottom - h.top) + k, left: 0, right: 0, bottom: 0 }
+        : { top: 0, left: panel.dataset.acik === "true" ? Math.round(b.right - h.left) + k : 0, right: 0, bottom: 0 };
+      if (view.padding.left !== p.left || view.padding.top !== p.top) view.padding = p;
+    }
+    const pay = () => ({ sol: view.padding.left || 0, ust: view.padding.top || 0 });
+
+    const altlik = harita.basemap.baseLayers.getItemAt(0);
+    await altlik.load();
+    const sinir = altlik.fullExtent;
+    const enUzak = () => Math.min(sinir.width / view.width, sinir.height / view.height);
+    function enUzagiAyarla() {
+      if (view.width && view.height) view.constraints.minScale = enUzak() * 96 * 39.37;
+    }
+    function merkeziSinirla(x, y, r) {
+      const W = view.width, H = view.height, { sol, ust } = pay();
+      const cx = sol + (W - sol) / 2, cy = ust + (H - ust) / 2;
+      let x0 = sinir.xmin + cx * r, x1 = sinir.xmax - (W - cx) * r;
+      let y0 = sinir.ymin + (H - cy) * r, y1 = sinir.ymax - cy * r;
+      if (x0 > x1) x0 = x1 = (x0 + x1) / 2;
+      if (y0 > y1) y0 = y1 = (y0 + y1) / 2;
+      return [Math.min(Math.max(x, x0), x1), Math.min(Math.max(y, y0), y1)];
+    }
+    const nokta = (x, y) => new Point({ x, y, spatialReference: view.spatialReference });
+    let programla = false;
+    reactiveUtils.watch(() => [view.width, view.height], enUzagiAyarla, { initial: true });
+    reactiveUtils.when(() => view.stationary, () => {
+      if (programla) return;
+      const [x, y] = merkeziSinirla(view.center.x, view.center.y, view.resolution);
+      if (Math.abs(x - view.center.x) > 1 || Math.abs(y - view.center.y) > 1)
+        view.goTo({ center: nokta(x, y) }, { duration: 300 }).catch(() => {});
+    });
+
+    const bolgeKodu = new Map(kayitlar.map(f => [f.attributes.bolge_kodu, f]));
+    async function ortala(secili) {
+      for (let i = 0; i < 30 && !popupKutusu(); i++) await new Promise(r => requestAnimationFrame(r));
+      bosluguGuncelle();
+      const bolge = secili.layer === bolgeler ? secili : bolgeKodu.get(secili.attributes && secili.attributes.bolge_kodu);
+      if (!bolge) return;
+      const ext = bolge.geometry.extent;
+      const hk = view.container.getBoundingClientRect(), pk = popupKutusu(), W = view.width, H = view.height;
+      const { sol: pSol, ust: pUst } = pay();
+      let sol = pSol, sag = W, ust = pUst, alt = H;
+      if (darEkran.matches) { if (pk) alt = pk.top - hk.top - 12; }
+      else if (pk) sag = pk.left - hk.left - 12;
+      if (sag - sol < 80 || alt - ust < 80) { sol = 0; sag = W; ust = 0; alt = H; }
+      const r = Math.min(Math.max(ext.width * 1.25 / (sag - sol), ext.height * 1.25 / (alt - ust)), enUzak());
+      const hedefX = (sol + sag) / 2, hedefY = (ust + alt) / 2;
+      const merkezX = pSol + (W - pSol) / 2, merkezY = pUst + (H - pUst) / 2;
+      const c = ext.center;
+      const [x, y] = merkeziSinirla(c.x + (merkezX - hedefX) * r, c.y - (merkezY - hedefY) * r, r);
+      programla = true;
+      await view.goTo({ center: nokta(x, y), scale: r * 96 * 39.37 }, { duration: 700 }).catch(() => {});
+      programla = false;
+      sonKutu = pk && [Math.round(pk.left), Math.round(pk.top)];
+      const kok = document.querySelector(".esri-popup--is-docked .esri-popup__main-container");
+      if (kok && kok !== izlenen) { if (izlenen) boyIzleyici.unobserve(izlenen); boyIzleyici.observe(kok); izlenen = kok; }
+    }
+    let sonKutu = null, izlenen = null, boyZamanlayici = 0;
+    const boyIzleyici = new ResizeObserver(() => {
+      clearTimeout(boyZamanlayici);
+      boyZamanlayici = setTimeout(() => {
+        const k = popupKutusu(), f = view.popup.selectedFeature;
+        if (!k || !f || !sonKutu) return;
+        if (Math.abs(k.left - sonKutu[0]) > 6 || Math.abs(k.top - sonKutu[1]) > 6) ortala(f);
+      }, 200);
+    });
+    reactiveUtils.watch(() => view.popup.selectedFeature, f => { if (f && f.geometry) ortala(f); });
+
+    panelDegisti = () => {
+      bosluguGuncelle();
+      if (view.popup.visible && view.popup.selectedFeature) ortala(view.popup.selectedFeature);
+    };
+    bosluguGuncelle();
+    new ResizeObserver(() => bosluguGuncelle()).observe(view.container);
+
+    const istenen = Number(new URLSearchParams(location.search).get("bolge"));
+    const secilen = kayitlar.find(f => f.attributes.sira === istenen);
+    if (secilen) {
+      secilen.layer = bolgeler; secilen.sourceLayer = bolgeler;
+      if (darEkran.matches) paneliAyarla(false);
+      view.openPopup({ features: [secilen], location: secilen.geometry.extent.center });
+    }
+
+    const cizimBitti = new Promise(r => setTimeout(r, 2500));
+    const perdeyiKaldir = () => cizimBitti.then(() => $("#yukleniyor").classList.add("bitti"));
+    view.whenLayerView(altlik).then(lv => reactiveUtils.whenOnce(() => !lv.updating)).then(perdeyiKaldir, perdeyiKaldir);
+    setTimeout(perdeyiKaldir, 5000);
+  }).catch(hata => {
+    $("#sayac .metin").textContent = "Harita yüklenemedi. Sayfayı yenileyin.";
+    $("#yukleniyor").classList.add("bitti");
+    console.error(hata);
+  });
+});</script>
+</body>
+</html>
